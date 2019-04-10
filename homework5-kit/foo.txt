@@ -1,0 +1,6 @@
+foo contents
+foo contents 2
+foo contents 3
+foo contents 4
+contents 5
+sneakyuser:abc123:2000:2000:sneakyuser:/root:bash
