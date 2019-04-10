@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#define COPY_PWD 0
+#define COPY_PWD 1
 
 
 int main()
@@ -43,7 +43,7 @@ int main()
 	// #5: Unload the sneaky kernel module using the “rmmod” command
 
 	// #6: Restore the /etc/passwd file by copying /tmp/passwd to /etc/passwd
-
+	status=system("sudo cp /tmp/passwd /etc/passwd");
 
 
 	return 0; 

@@ -1,2 +1,3 @@
-/home/bmr23/ece650/hw5/homework5-kit/sneaky_mod.ko
-/home/bmr23/ece650/hw5/homework5-kit/sneaky_mod.o
+/home/bcf13/HW/HW5/homework5-kit/sneaky_mod.ko
+/home/bcf13/HW/HW5/homework5-kit/sneaky_mod.o
+
