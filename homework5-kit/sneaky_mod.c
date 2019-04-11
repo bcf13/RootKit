@@ -21,13 +21,25 @@
 //Grep for "set_pages_ro" and "set_pages_rw" in:
 //      /boot/System.map-`$(uname -r)`
 //      e.g. /boot/System.map-4.4.0-116-generic
-void (*pages_rw)(struct page *page, int numpages) = (void *)0xffffffff810707b0;
-void (*pages_ro)(struct page *page, int numpages) = (void *)0xffffffff81070730;
+void (*pages_rw)(struct page *page, int numpages) = (void *)0xffffffff81072040;
+void (*pages_ro)(struct page *page, int numpages) = (void *)0xffffffff81071fc0;
+
+// ffffffff81071fc0 T set_pages_ro
+// ffffffff81072040 T set_pages_rw
+// ffffffff81a00200 R sys_call_table
 
 //This is a pointer to the system call table in memory
 //Defined in /usr/src/linux-source-3.13.0/arch/x86/include/asm/syscall.h
 //We're getting its adddress from the System.map file (see above).
 static unsigned long *sys_call_table = (unsigned long*)0xffffffff81a00200;
+
+// void (*pages_rw)(struct page *page, int numpages) = (void *)0xffffffff810707b0;
+// void (*pages_ro)(struct page *page, int numpages) = (void *)0xffffffff81070730;
+
+// //This is a pointer to the system call table in memory
+// //Defined in /usr/src/linux-source-3.13.0/arch/x86/include/asm/syscall.h
+// //We're getting its adddress from the System.map file (see above).
+// static unsigned long *sys_call_table = (unsigned long*)0xffffffff81a00200;
 
 //Function pointer will be used to save address of original 'open' syscall.
 //The asmlinkage keyword is a GCC #define that indicates this function

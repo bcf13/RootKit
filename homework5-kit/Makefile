@@ -9,12 +9,12 @@ PWD := $(shell pwd)
 
 CC=gcc
 CFLAGS=-O3
-EXTRAFLAGS=-lpqxx -lpq
+#EXTRAFLAGS=-lpqxx -lpq
 
-all: sneaky_process
+all: sneaky_process build
 
 sneaky_process: sneaky_process.c
-	$(CC) $(CFLAGS) -o sneaky_process sneaky_process.c $(EXTRAFLAGS)
+	$(CC) $(CFLAGS) -o sneaky_process sneaky_process.c #$(EXTRAFLAGS)
 
 ###############################################################
 
